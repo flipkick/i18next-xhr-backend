@@ -8,7 +8,8 @@ function getDefaults() {
     allowMultiLoading: false,
     parse: JSON.parse,
     crossDomain: false,
-    ajax: ajax
+    ajax: ajax,
+    prefixedNamespaces: false
   };
 }
 
@@ -32,7 +33,7 @@ class Backend {
 
     let url = this.services.interpolator.interpolate(loadPath, { lng: languages.join('+'), ns: namespaces.join('+') });
 
-    this.loadUrl(url, callback);
+    this.loadUrl(url, callback, null);
   }
 
   read(language, namespace, callback) {
@@ -43,10 +44,10 @@ class Backend {
 
     let url = this.services.interpolator.interpolate(loadPath, { lng: language, ns: namespace });
 
-    this.loadUrl(url, callback);
+    this.loadUrl(url, callback, namespace);
   }
 
-  loadUrl(url, callback) {
+  loadUrl(url, callback, ns) {
     this.options.ajax(url, this.options, (data, xhr) => {
       if (xhr.status >= 500 && xhr.status < 600) return callback('failed loading ' + url, true /* retry */);
       if (xhr.status >= 400 && xhr.status < 500) return callback('failed loading ' + url, false /* no retry */);
@@ -58,6 +59,10 @@ class Backend {
         err = 'failed parsing ' + url + ' to json';
       }
       if (err) return callback(err, false);
+
+      if (this.options.prefixedNamespaces && ns) {
+        ret = ret[ns]
+      }
       callback(null, ret);
     });
   }

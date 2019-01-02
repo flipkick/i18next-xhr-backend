@@ -100,7 +100,8 @@ function getDefaults() {
     allowMultiLoading: false,
     parse: JSON.parse,
     crossDomain: false,
-    ajax: ajax
+    ajax: ajax,
+    prefixedNamespaces: false
   };
 }
 
@@ -133,7 +134,7 @@ var Backend = function () {
 
       var url = this.services.interpolator.interpolate(loadPath, { lng: languages.join('+'), ns: namespaces.join('+') });
 
-      this.loadUrl(url, callback);
+      this.loadUrl(url, callback, null);
     }
   }, {
     key: 'read',
@@ -145,11 +146,11 @@ var Backend = function () {
 
       var url = this.services.interpolator.interpolate(loadPath, { lng: language, ns: namespace });
 
-      this.loadUrl(url, callback);
+      this.loadUrl(url, callback, namespace);
     }
   }, {
     key: 'loadUrl',
-    value: function loadUrl(url, callback) {
+    value: function loadUrl(url, callback, ns) {
       var _this = this;
 
       this.options.ajax(url, this.options, function (data, xhr) {
@@ -164,6 +165,10 @@ var Backend = function () {
           err = 'failed parsing ' + url + ' to json';
         }
         if (err) return callback(err, false);
+
+        if (_this.options.prefixedNamespaces && ns) {
+          ret = ret[ns];
+        }
         callback(null, ret);
       });
     }
