@@ -12,6 +12,7 @@ npm-debug.log.*
 *~
 *.swp
 
+package-lock.json
 
 # Ignore various Node.js related directories and files
 node_modules
